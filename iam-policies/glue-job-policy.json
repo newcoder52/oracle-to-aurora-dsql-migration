@@ -1,0 +1,50 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3Access",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::your-migration-bucket",
+        "arn:aws:s3:::your-migration-bucket/*"
+      ]
+    },
+    {
+      "Sid": "GlueDataCatalogAccess",
+      "Effect": "Allow",
+      "Action": [
+        "glue:GetDatabase",
+        "glue:GetTable",
+        "glue:GetPartitions"
+      ],
+      "Resource": [
+        "arn:aws:glue:*:*:catalog",
+        "arn:aws:glue:*:*:database/db_name",
+        "arn:aws:glue:*:*:table/table_name/*",
+        "arn:aws:glue:*:*:table/table_name"
+      ]
+    },
+    {
+      "Sid": "AuroraDSQLAccess",
+      "Effect": "Allow",
+      "Action": [
+        "dsql:DbConnect",
+        "dsql:DbConnectAdmin"
+      ],
+      "Resource": "arn:aws:dsql:*:*:cluster/*"
+    },
+    {
+      "Sid": "DSQLTokenGeneration",
+      "Effect": "Allow",
+      "Action": [
+        "dsql:GenerateDbConnectAdminAuthToken",
+        "dsql:GenerateDbConnectAuthToken"
+      ],
+      "Resource": "arn:aws:dsql:us-east-1:ACCOUNT_ID:cluster/CLUSTER_NAME"
+    }
+  ]
+}
