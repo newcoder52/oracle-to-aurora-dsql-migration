@@ -1,0 +1,36 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DMSAccess",
+      "Effect": "Allow",
+      "Action": [
+        "dms:StartReplicationTask",
+        "dms:DescribeReplicationTasks"
+      ],
+      "Resource": "arn:aws:dms:REGION:ACCOUNT_ID:task:YOUR_DMS_TASK_ID"
+    },
+    {
+      "Sid": "LambdaInvoke",
+      "Effect": "Allow",
+      "Action": "lambda:InvokeFunction",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:YOUR_LAMBDA_FUNCTION_NAME"
+    },
+    {
+      "Sid": "GlueJobRun",
+      "Effect": "Allow",
+      "Action": "glue:StartJobRun",
+      "Resource": "arn:aws:glue:REGION:ACCOUNT_ID:job/YOUR_GLUE_JOB_NAME"
+    },
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
