@@ -1,0 +1,93 @@
+{
+  "Comment": "Monitor DMS task, wait for full load completion, and trigger Glue job",
+  "StartAt": "StartDMSTask",
+  "States": {
+    "StartDMSTask": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:databasemigration:startReplicationTask",
+      "Parameters": {
+        "ReplicationTaskArn": "arn:aws:dms:REGION:ACCOUNT_ID:task:YOUR_DMS_TASK_ID",
+        "StartReplicationTaskType": "start-replication"
+      },
+      "Next": "GetDMSTaskDetails"
+    },
+    "GetDMSTaskDetails": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:databasemigration:describeReplicationTasks",
+      "Parameters": {
+        "Filters": [
+          {
+            "Name": "replication-task-arn",
+            "Values": [
+              "arn:aws:dms:REGION:ACCOUNT_ID:task:YOUR_DMS_TASK_ID"
+            ]
+          }
+        ]
+      },
+      "ResultPath": "$.dmsTaskDetails",
+      "Next": "CheckDMSTaskStatus"
+    },
+    "CheckDMSTaskStatus": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "And": [
+            {
+              "Variable": "$.dmsTaskDetails.ReplicationTasks[0].Status",
+              "StringEquals": "stopped"
+            },
+            {
+              "Variable": "$.dmsTaskDetails.ReplicationTasks[0].ReplicationTaskStats.FullLoadProgressPercent",
+              "NumericEquals": 100
+            }
+          ],
+          "Next": "ExtractTableName"
+        },
+        {
+          "Variable": "$.dmsTaskDetails.ReplicationTasks[0].Status",
+          "StringEquals": "failed",
+          "Next": "DMSTaskFailed"
+        },
+        {
+          "Variable": "$.dmsTaskDetails.ReplicationTasks[0].Status",
+          "StringEquals": "running",
+          "Next": "WaitForDMSTask"
+        }
+      ],
+      "Default": "WaitForDMSTask"
+    },
+    "WaitForDMSTask": {
+      "Type": "Wait",
+      "Seconds": 60,
+      "Next": "GetDMSTaskDetails"
+    },
+    "DMSTaskFailed": {
+      "Type": "Fail",
+      "Cause": "DMS task failed",
+      "Error": "DMS_TASK_ERROR"
+    },
+    "ExtractTableName": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:REGION:ACCOUNT_ID:function:YOUR_LAMBDA_FUNCTION_NAME",
+        "Payload": {
+          "tableMappings.$": "$.dmsTaskDetails.ReplicationTasks[0].TableMappings"
+        }
+      },
+      "ResultPath": "$.extractedTableName",
+      "Next": "StartGlueJob"
+    },
+    "StartGlueJob": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun",
+      "Parameters": {
+        "JobName": "YOUR_GLUE_JOB_NAME",
+        "Arguments": {
+          "--table_name.$": "$.extractedTableName.Payload.body"
+        }
+      },
+      "End": true
+    }
+  }
+}
