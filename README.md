@@ -6,7 +6,11 @@ This repository contains the code and configuration for migrating an Oracle data
 
 The following diagram illustrates the solution architecture:
 
-![Solution Architecture](images/step-functions-workflow.png)
+![Solution Architecture](images/architecture.png)
+
+**Step Functions Orchestration Workflow:**
+
+![Step Functions Workflow](images/step-functions-workflow.png)
 
 ## Repository Structure
 
@@ -14,7 +18,7 @@ The following diagram illustrates the solution architecture:
 .
 |-- README.md
 |-- images/
-|   |-- architecture.emf              # High-level solution architecture (vector)
+|   |-- architecture.png              # High-level solution architecture
 |   |-- step-functions-workflow.png    # Step Functions orchestrator diagram
 |-- lambda/
 |   |-- index.mjs                     # Lambda: extract table names from DMS mappings
