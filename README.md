@@ -4,38 +4,28 @@ This repository contains the code and configuration for migrating an Oracle data
 
 ## Architecture
 
-```
-┌─────────────────┐     ┌─────────┐     ┌──────────┐     ┌─────────────┐
-│ Oracle Database │────▶│ AWS DMS │────▶│ Amazon S3│────▶│ AWS Glue    │
-│   (Source)      │     │         │     │ + Catalog│     │  ETL Job    │
-└─────────────────┘     └─────────┘     └──────────┘     └──────┬──────┘
-                              │                                     │
-                              │         ┌──────────────┐           │
-                              └────────▶│Step Functions│──────────┘
-                                       │ (Orchestrator)。
-                                       └──────────────┘
-                                                                    │
-                                                                    ▼
-                                                          ┌─────────────────┐
-                                                          │ Amazon Aurora   │
-                                                          │     DSQL       │
-                                                          └─────────────────┘
-```
+The following diagram illustrates the solution architecture:
+
+![Solution Architecture](images/architecture.emf)
+
+**Step Functions Orchestration Workflow:**
+
+![Step Functions Workflow](images/step-functions-workflow.png)
 
 ## Repository Structure
 
 ```
 .
-├── README.md
-├── lambda/
-│   └── index.mjs                   # Lambda function to extract table names from DMS mappings
-├── glue/
-│   └── oracle_to_dsql_etl.py      # Glue ETL job for schema creation and data loading
-├── step-functions/
-│   └── state-machine.asl.json     # Step Functions state machine definition
-└── iam-policies/
-    ├── glue-job-policy.json                       # IAM policy for Glue job
-    └── step-functions-execution-role-policy.json   # IAM policy for Step Functions
+âââ README.md
+âââ lambda/
+â   âââ index.mjs                   # Lambda function to extract table names from DMS mappings
+âââ glue/
+â   âââ oracle_to_dsql_etl.py      # Glue ETL job for schema creation and data loading
+âââ step-functions/
+â   âââ state-machine.asl.json     # Step Functions state machine definition
+âââ iam-policies/
+    âââ glue-job-policy.json                       # IAM policy for Glue job
+    âââ step-functions-execution-role-policy.json   # IAM policy for Step Functions
 ```
 
 ## Components
@@ -85,21 +75,21 @@ Replace the following placeholder values in the code:
 
 ## Deployment Steps
 
-1. **Create Aurora DSQL Cluster** — Via the Aurora DSQL console
-2. **Configure AWS DMS** — Create replication instance, source/target endpoints, and migration task
-3. **Deploy Lambda Function** — Upload `lambda/index.mjs` with Node.js 18+ runtime
-4. **Create Glue ETL Job** — Upload `glue/oracle_to_dsql_etl.py` with:
+1. **Create Aurora DSQL Cluster** â Via the Aurora DSQL console
+2. **Configure AWS DMS** â Create replication instance, source/target endpoints, and migration task
+3. **Deploy Lambda Function** â Upload `lambda/index.mjs` with Node.js 18+ runtime
+4. **Create Glue ETL Job** â Upload `glue/oracle_to_dsql_etl.py` with:
    - Dependent JAR: `postgresql-42.7.4.jar`
    - Python module: `boto3>=1.35.95`
-5. **Create Step Functions State Machine** — Use `step-functions/state-machine.asl.json`
-6. **Apply IAM Policies** — Attach policies from `iam-policies/`
+5. **Create Step Functions State Machine** â Use `step-functions/state-machine.asl.json`
+6. **Apply IAM Policies** â Attach policies from `iam-policies/`
 
 ## Key Technical Notes
 
 - **Authentication**: Aurora DSQL uses IAM-based auth tokens (max 24hr, set to 1hr in code)
 - **Isolation Level**: `REPEATABLE_READ` is required for Aurora DSQL writes
 - **Batch Size**: Data is written in batches of 9,900 rows per partition
-- **Data Type Mapping**: Custom mapping handles Oracle → Glue → Aurora DSQL type conversions
+- **Data Type Mapping**: Custom mapping handles Oracle â Glue â Aurora DSQL type conversions
 
 ## References
 
