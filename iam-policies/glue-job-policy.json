@@ -22,10 +22,9 @@
         "glue:GetPartitions"
       ],
       "Resource": [
-        "arn:aws:glue:*:*:catalog",
-        "arn:aws:glue:*:*:database/db_name",
-        "arn:aws:glue:*:*:table/table_name/*",
-        "arn:aws:glue:*:*:table/table_name"
+        "arn:aws:glue:us-east-1:ACCOUNT_ID:catalog",
+        "arn:aws:glue:us-east-1:ACCOUNT_ID:database/YOUR_DATABASE",
+        "arn:aws:glue:us-east-1:ACCOUNT_ID:table/YOUR_DATABASE/*"
       ]
     },
     {
@@ -35,7 +34,7 @@
         "dsql:DbConnect",
         "dsql:DbConnectAdmin"
       ],
-      "Resource": "arn:aws:dsql:*:*:cluster/*"
+      "Resource": "arn:aws:dsql:us-east-1:ACCOUNT_ID:cluster/YOUR_CLUSTER_NAME"
     },
     {
       "Sid": "DSQLTokenGeneration",
@@ -44,7 +43,7 @@
         "dsql:GenerateDbConnectAdminAuthToken",
         "dsql:GenerateDbConnectAuthToken"
       ],
-      "Resource": "arn:aws:dsql:us-east-1:ACCOUNT_ID:cluster/CLUSTER_NAME"
+      "Resource": "arn:aws:dsql:us-east-1:ACCOUNT_ID:cluster/YOUR_CLUSTER_NAME"
     }
   ]
 }
